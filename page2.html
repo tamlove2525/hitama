@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang 2 - Hộp thư B</title>
+  <!-- Import font Montserrat từ Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+  <!-- Thư viện canvas-confetti để tạo hiệu ứng pháo hoa -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(#3499ff, #7fc9d6);
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+    /* Chữ HITAMA hiển thị ở góc trái */
+    .hitama {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(#cfd9df, #e2ebf0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      z-index: 1000;
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      z-index: 2;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+    }
+    textarea {
+      width: 100%;
+      height: 250px;
+      color: rgb(1, 80, 18);
+      padding: 10px;
+      box-sizing: border-box;
+      resize: vertical;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      background-image: linear-gradient(white, white), linear-gradient(45deg, #3499ff, #3a3985);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      margin-top: 10px;
+      font-family: Arial, sans-serif;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      background-image: linear-gradient(white, white), linear-gradient(45deg, #3499ff, #3a3985);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      color: rgb(0, 90, 163);
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    #textAContainer {
+      display: none;
+      margin-top: 10px;
+      background: #f0f0f0;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background-image: linear-gradient(#f0f0f0, #f0f0f0), linear-gradient(45deg, #3499ff, #3a3985);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      white-space: pre-wrap;
+      font-family: Arial, sans-serif;
+    }
+    .incorrect { color: red; }
+    .suggestion {
+      color: gray;
+      font-size: 0.9em;
+    }
+    #suggestions > div { margin-top: 5px; }
+    /* Hiệu ứng mưa */
+    #rainContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+      display: none;
+    }
+    .raindrop {
+      position: absolute;
+      top: -10px;
+      width: 2px;
+      height: 15px;
+      background: rgba(255,255,255,0.8);
+      animation: fall 1s linear infinite;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Chữ HITAMA ở góc trái -->
+  <div class="hitama">HITAMA</div>
+  <div id="rainContainer"></div>
+  <div class="container">
+    <h1>Nhập lại nội dung học thuộc</h1>
+    <button id="toggleTextA">Nội dung học thuộc</button>
+    <div id="textAContainer"></div>
+    <textarea id="textB" placeholder="Nhập nội dung vào Hộp thư B"></textarea>
+    <div id="suggestions"></div>
+    <button id="checkBtn">Kiểm tra</button>
+    <button id="resetBtn">Làm lại</button>
+    <button id="backBtn">Quay lại</button>
+    <div id="result" style="margin-top: 10px; font-weight: bold;"></div>
+  </div>
+  <script>
+    // Lấy nội dung hộp A đã lưu từ trang 1
+    var textA = localStorage.getItem("textA") || "";
+    var wordsA = textA.trim().split(/\s+/);
+    // Xử lý nút "Đề bài" để bật/tắt hiển thị nội dung hộp A
+    document.getElementById("toggleTextA").addEventListener("click", function() {
+      var container = document.getElementById("textAContainer");
+      if (container.style.display === "none" || container.style.display === "") {
+        container.style.display = "block";
+        container.textContent = textA;
+      } else {
+        container.style.display = "none";
+      }
+    });
+    // Hàm tạo hiệu ứng mưa
+    function showRain() {
+      var rainContainer = document.getElementById("rainContainer");
+      rainContainer.innerHTML = "";
+      rainContainer.style.display = "block";
+      var raindropCount = 50;
+      for (var i = 0; i < raindropCount; i++) {
+        var drop = document.createElement("div");
+        drop.className = "raindrop";
+        drop.style.left = Math.random() * 100 + "vw";
+        drop.style.animationDelay = Math.random() * 1 + "s";
+        drop.style.animationDuration = (0.5 + Math.random()) + "s";
+        rainContainer.appendChild(drop);
+      }
+    }
+    // Hàm ẩn hiệu ứng mưa
+    function hideRain() {
+      var rainContainer = document.getElementById("rainContainer");
+      rainContainer.style.display = "none";
+      rainContainer.innerHTML = "";
+    }
+    // Hàm kiểm tra nội dung và hiển thị kết quả kèm hiệu ứng
+    function checkText() {
+      var textB = document.getElementById("textB").value;
+      var wordsB = textB.trim().split(/\s+/);
+      var resultDiv = document.getElementById("result");
+      var suggestionsDiv = document.getElementById("suggestions");
+      resultDiv.textContent = "";
+      suggestionsDiv.innerHTML = "";
+      hideRain();
+      var allCorrect = true;
+      for (var i = 0; i < wordsB.length; i++) {
+        if (wordsA[i] && wordsB[i] !== wordsA[i]) {
+          allCorrect = false;
+          var suggestion = document.createElement("div");
+          suggestion.textContent = "Gợi ý cho từ " + (i + 1) + ": " + wordsA[i];
+          suggestion.className = "suggestion";
+          suggestionsDiv.appendChild(suggestion);
+        } else if (!wordsA[i]) {
+          allCorrect = false;
+          var suggestion = document.createElement("div");
+          suggestion.textContent = "Không có từ gợi ý cho vị trí " + (i + 1);
+          suggestion.className = "suggestion";
+          suggestionsDiv.appendChild(suggestion);
+        }
+      }
+      if (wordsB.length !== wordsA.length) {
+        allCorrect = false;
+      }
+      if (allCorrect) {
+        resultDiv.textContent = "Đúng";
+        document.body.style.background = "linear-gradient(#fad0c4 , #ffd1ff)";
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } else {
+        resultDiv.textContent = "Sai";
+        document.body.style.background = "linear-gradient(#cfd9df, #e2ebf0)";
+        showRain();
+      }
+    }
+    document.getElementById("checkBtn").addEventListener("click", checkText);
+    document.getElementById("resetBtn").addEventListener("click", function() {
+      document.getElementById("textB").value = "";
+      document.getElementById("suggestions").innerHTML = "";
+      document.getElementById("result").textContent = "";
+      hideRain();
+      document.body.style.background = "linear-gradient(#3499ff, #3a3985)";
+    });
+    document.getElementById("backBtn").addEventListener("click", function() {
+      window.location.href = "index.html";
+    });
+    document.getElementById("textB").addEventListener("input", function() {
+      var textB = this.value;
+      var wordsB = textB.trim().split(/\s+/);
+      var suggestionsDiv = document.getElementById("suggestions");
+      suggestionsDiv.innerHTML = "";
+      hideRain();
+      for (var i = 0; i < wordsB.length; i++) {
+        if (wordsA[i] && wordsB[i] !== wordsA[i]) {
+          var suggestion = document.createElement("div");
+          suggestion.textContent = "Gợi ý cho từ " + (i + 1) + ": " + wordsA[i];
+          suggestion.className = "suggestion";
+          suggestionsDiv.appendChild(suggestion);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
